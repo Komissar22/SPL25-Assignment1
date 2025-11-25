@@ -24,7 +24,9 @@ public:
     /**
      * Default constructor - creates empty wrapper
      */
-    PointerWrapper() : ptr(nullptr) {}
+    PointerWrapper() : ptr(nullptr) {
+    
+    }
 
     /**
      * Constructor from raw pointer - wraps the pointer
@@ -37,7 +39,9 @@ public:
      * Think about ownership and resource management.
      * Is the default destructor sufficient here?
      */
-    ~PointerWrapper() =default;
+    ~PointerWrapper() {
+        delete ptr;
+    };
 
     // ========== COPY OPERATIONS (DELETED) ==========
 
@@ -89,7 +93,10 @@ public:
      * What safety checks should you perform?
      */
     T* operator->() const {
-        return nullptr;
+        if (ptr == nullptr) {
+        throw std::runtime_error("Dereferencing null pointer in PointerWrapper");
+    }
+        return ptr;
     }
 
     /**
@@ -119,6 +126,8 @@ public:
      * What should happen to the old pointer?
      */
     void reset(T* new_ptr = nullptr) {
+         delete ptr;
+         ptr = new_ptr;
     }
 
     // ========== UTILITY FUNCTIONS ==========
@@ -162,7 +171,7 @@ template<typename T>
 void swap(PointerWrapper<T>& lhs, PointerWrapper<T>& rhs) noexcept {
     // TODO: Implement global swap function
     // HINT: You can use the member swap function
-    //your code here...
+      lhs.swap(rhs);
 }
 
 #endif // POINTERWRAPPER_H
