@@ -41,7 +41,24 @@
         "*.h": "cpp",
         "*.cpp": "cpp",
         "*.txt": "plaintext",
-        "new": "cpp"
+        "new": "cpp",
+        "array": "cpp",
+        "charconv": "cpp",
+        "functional": "cpp",
+        "memory": "cpp",
+        "tuple": "cpp",
+        "fstream": "cpp",
+        "iomanip": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "ostream": "cpp",
+        "numeric": "cpp",
+        "sstream": "cpp",
+        "streambuf": "cpp",
+        "utility": "cpp",
+        "variant": "cpp",
+        "compare": "cpp",
+        "format": "cpp"
     },
     
     // Editor settings for academic integrity
