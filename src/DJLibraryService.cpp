@@ -14,9 +14,48 @@ DJLibraryService::DJLibraryService(const Playlist& playlist)
  * @param library_tracks Vector of track info from config
  */
 void DJLibraryService::buildLibrary(const std::vector<SessionConfig::TrackInfo>& library_tracks) {
-    //Todo: Implement buildLibrary method
-    std::cout << "TODO: Implement DJLibraryService::buildLibrary method\n"<< library_tracks.size() << " tracks to be loaded into library.\n";
+        for (const auto& info : library_tracks) {
+        AudioTrack* track = nullptr;
+
+        if (info.type == "MP3") {
+            bool has_tags = (info.extra_param2 != 0);
+            track = new MP3Track(
+                info.title,
+                info.artists,
+                info.duration_seconds,
+                info.bpm,
+                info.extra_param1, // bitrate
+                has_tags
+            );
+            std::cout << "MP3: MP3Track created: "
+                      << info.extra_param1 << " kbps\n";
+        }
+        else if (info.type == "WAV") {
+            track = new WAVTrack(
+                info.title,
+                info.artists,
+                info.duration_seconds,
+                info.bpm,
+                info.extra_param1, // sample_rate
+                info.extra_param2  // bit_depth
+            );
+            std::cout << "WAV: WAVTrack created: "
+                      << info.extra_param1 << "Hz/"
+                      << info.extra_param2 << "bit\n";
+        }
+        else {
+            continue;
+        }
+
+        library.push_back(track);
+    }
+
+    std::cout << "[INFO] Track library built: " 
+              << library_tracks.size() 
+              << " tracks loaded\n";
 }
+
+    
 
 /**
  * @brief Display the current state of the DJ library playlist
@@ -88,6 +127,9 @@ void DJLibraryService::loadPlaylistFromIndices(const std::string& playlist_name,
  * @return Vector of track titles in the playlist
  */
 std::vector<std::string> DJLibraryService::getTrackTitles() const {
-    // Your implementation here
-    return std::vector<std::string>(); // Placeholder
+    std::vector<std::string> titles;
+     for (const auto& track : playlist.getTracks()) { 
+        titles.push_back(track->get_title());
+    }
+    return titles;
 }
