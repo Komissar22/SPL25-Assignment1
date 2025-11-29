@@ -35,9 +35,6 @@ int DJControllerService::loadTrackToCache(AudioTrack& track) {
     return 0;
 }
 
-AudioTrack* DJControllerService::getTrackFromCache(const std::string& track_title) {
-    return cache.get(track_title);
-}
 
 void DJControllerService::set_cache_size(size_t new_size) {
     cache.set_capacity(new_size);

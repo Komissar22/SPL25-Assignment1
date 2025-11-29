@@ -50,7 +50,7 @@ int MixingEngineService::loadTrackToDeck(const AudioTrack& track) {
         }
     }
 
-    if (decks[active_deck] && auto_sync && can_mix_tracks){
+    if (decks[active_deck] && auto_sync && can_mix_tracks(cloned)){
         sync_bpm(cloned);
     }
 
