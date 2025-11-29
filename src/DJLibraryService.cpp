@@ -8,7 +8,7 @@
 
 
 DJLibraryService::DJLibraryService(const Playlist& playlist) 
-    : playlist(playlist) {}
+    : playlist(playlist), library() {}
 /**
  * @brief Load a playlist from track indices referencing the library
  * @param library_tracks Vector of track info from config
@@ -92,16 +92,35 @@ Playlist& DJLibraryService::getPlaylist() {
  * HINT: Leverage Playlist's find_track method
  */
 AudioTrack* DJLibraryService::findTrack(const std::string& track_title) {
-    // Your implementation here
-    return nullptr; // Placeholder
+    return playlist.find_track(track_title);
 }
 
 void DJLibraryService::loadPlaylistFromIndices(const std::string& playlist_name, 
                                                const std::vector<int>& track_indices) {
-    // Your implementation here
-    // For now, add a placeholder to fix the linker error
-    (void)playlist_name;  // Suppress unused parameter warning
-    (void)track_indices;  // Suppress unused parameter warning
+    std::cout <<"[INFO] Loading playlist: " << playlist_name << std::endl;
+    Playlist lst(playlist_name);
+
+    for(int index : track_indices){
+        if(index<=0 || index > library.size()){
+            std::cout << "[WARNING] Invalid track index: " << index << std::endl;
+            continue;
+        }
+        AudioTrack* track = library[index - 1];
+
+        PointerWrapper<AudioTrack> cloned = track->clone();
+        if(!cloned){
+            std::cout << "[WARNING] Invalid track index: " << index << std::endl;
+            continue;
+        }
+        
+        cloned->load();
+        cloned->analyze_beatgrid();
+        playlist.add_track(cloned.release());
+        std::cout << " Added " << (*track).get_title() << "to playlist" << playlist_name << std::endl;
+    }
+    
+    std::cout << " [INFO] Playlist loaded: " << playlist_name <<
+                     playlist.get_track_count()  << " tracks." << std::endl;
 }
 /**
  * TODO: Implement getTrackTitles method
