@@ -150,7 +150,6 @@ void DJSession::simulate_dj_performance() {
     std::cout << "Cache Capacity: " << session_config.controller_cache_size << " slots (LRU policy)" << std::endl;
     std::cout << "\n--- Processing Tracks ---" << std::endl;
 
-    if (play_all) {
     std::vector<std::string> playlist_names;
 
     for (const auto& [name, _] : session_config.playlists) {
@@ -158,6 +157,8 @@ void DJSession::simulate_dj_performance() {
     }
     std::sort(playlist_names.begin(), playlist_names.end());
 
+    if (play_all) {
+    
     for (const std::string& name : playlist_names) {//לולאה על כל הפלייליסטים
         if(!load_playlist(name)){
             std::cerr << "[ERROR] Failed to load playlist " << std::endl;
@@ -181,16 +182,19 @@ void DJSession::simulate_dj_performance() {
     }
 }
     else {
-        std::string selected = display_playlist_menu_from_config();
-        while(true){
+        bool checkout = true;
+        while(checkout){
+            std::string selected = display_playlist_menu_from_config();
             if (selected=="0" || selected.empty()){
-                break;
+                checkout=false;
             }
+            else{
             for(std::string& track : track_titles){
             std::cout << "\n-- Processing: " << track << std::endl;
             stats.tracks_processed++;
             load_track_to_controller(track);
             load_track_to_mixer_deck(track);
+            }
         }
         print_session_summary();
         stats.tracks_processed = 0;
