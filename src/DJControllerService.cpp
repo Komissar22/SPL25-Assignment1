@@ -12,11 +12,13 @@ DJControllerService::DJControllerService(size_t cache_size)
 int DJControllerService::loadTrackToCache(AudioTrack& track) {
     const std::string& title = track.get_title();
 
+    //CASE 1
     if (cache.contains(title)) {
-        cache.get(title);
+        cache.get(title);   // updates LRU access counter
         return 1;
     }
 
+    //CASE 2
     PointerWrapper<AudioTrack> clone_wrapper = track.clone();
     AudioTrack* cloned = clone_wrapper.get();
 
@@ -25,15 +27,20 @@ int DJControllerService::loadTrackToCache(AudioTrack& track) {
         return 0;
     }
 
+    // load + beatgrid (ALWAYS before inserting into cache, as in output)
     cloned->load();
     cloned->analyze_beatgrid();
 
-    if (cache.put(std::move(clone_wrapper))) {
-        return -1;
+    //CASE 3
+    bool inserted = cache.put(std::move(clone_wrapper));
+
+    if (inserted) {
+        return -1;   // SUCCESSFUL INSERT
     }
 
-    return 0;
+    return 0;       // FAILED INSERT
 }
+
 
 
 void DJControllerService::set_cache_size(size_t new_size) {

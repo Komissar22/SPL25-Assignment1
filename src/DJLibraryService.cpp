@@ -6,15 +6,15 @@
 #include <memory>
 #include <filesystem>
 
-
 DJLibraryService::DJLibraryService(const Playlist& playlist) 
     : playlist(playlist), library() {}
+
 /**
  * @brief Load a playlist from track indices referencing the library
  * @param library_tracks Vector of track info from config
  */
 void DJLibraryService::buildLibrary(const std::vector<SessionConfig::TrackInfo>& library_tracks) {
-        for (const auto& info : library_tracks) {
+    for (const auto& info : library_tracks) {
         AudioTrack* track = nullptr;
 
         if (info.type == "MP3") {
@@ -27,7 +27,8 @@ void DJLibraryService::buildLibrary(const std::vector<SessionConfig::TrackInfo>&
                 info.extra_param1, // bitrate
                 has_tags
             );
-            std::cout << "MP3: MP3Track created: "
+            // match expected output: "MP3Track created: 192 kbps"
+            std::cout << "MP3Track created: "
                       << info.extra_param1 << " kbps\n";
         }
         else if (info.type == "WAV") {
@@ -39,9 +40,8 @@ void DJLibraryService::buildLibrary(const std::vector<SessionConfig::TrackInfo>&
                 info.extra_param1, // sample_rate
                 info.extra_param2  // bit_depth
             );
-            std::cout << "WAV: WAVTrack created: "
-                      << info.extra_param1 << "Hz/"
-                      << info.extra_param2 << "bit\n";
+            // no extra prefix like "WAV: " here – creation line comes from WAVTrack
+            // constructor ("WAVTrack created: 96000Hz/24bit")
         }
         else {
             continue;
@@ -55,11 +55,8 @@ void DJLibraryService::buildLibrary(const std::vector<SessionConfig::TrackInfo>&
               << " tracks loaded\n";
 }
 
-
-
 /**
  * @brief Display the current state of the DJ library playlist
- * 
  */
 void DJLibraryService::displayLibrary() const {
     std::cout << "=== DJ Library Playlist: " 
@@ -73,16 +70,14 @@ void DJLibraryService::displayLibrary() const {
     // Let Playlist handle printing all track info
     playlist.display();
 
-    std::cout << "Total duration: " << playlist.get_total_duration() << " seconds" << std::endl;
+    std::cout << "Total duration: " << playlist.get_total_duration()
+              << " seconds" << std::endl;
 }
 
 /**
  * @brief Get a reference to the current playlist
- * 
- * @return Playlist& 
  */
 Playlist& DJLibraryService::getPlaylist() {
-    // Your implementation here
     return playlist;
 }
 
@@ -97,38 +92,47 @@ AudioTrack* DJLibraryService::findTrack(const std::string& track_title) {
 
 void DJLibraryService::loadPlaylistFromIndices(const std::string& playlist_name, 
                                                const std::vector<int>& track_indices) {
-    std::cout <<"[INFO] Loading playlist: " << playlist_name << std::endl;
+    std::cout << "[INFO] Loading playlist: " << playlist_name << std::endl;
+
     Playlist lst(playlist_name);
 
-    for(int index : track_indices){
-        if(index<=0 || index > library.size()){
+    for (int index : track_indices) {
+        if (index <= 0 || index > static_cast<int>(library.size())) {
             std::cout << "[WARNING] Invalid track index: " << index << std::endl;
             continue;
         }
+
         AudioTrack* track = library[index - 1];
 
         PointerWrapper<AudioTrack> cloned = track->clone();
-        if(!cloned){
+        if (!cloned) {
             std::cout << "[WARNING] Invalid track index: " << index << std::endl;
             continue;
         }
-        
+
         cloned->load();
         cloned->analyze_beatgrid();
+
+        // add cloned track to the member playlist as before
         playlist.add_track(cloned.release());
-        std::cout << " Added " << (*track).get_title() << "to playlist" << playlist_name << std::endl;
+
+        // match expected: "Added 'Silence' to playlist 'progressive_house'"
+        std::cout << "Added '" << track->get_title()
+                  << "' to playlist '" << playlist_name << "'" << std::endl;
     }
-    
-    std::cout << " [INFO] Playlist loaded: " << playlist_name <<
-                     playlist.get_track_count()  << " tracks." << std::endl;
+
+    // match expected: "[INFO] Playlist loaded: progressive_house (3 tracks)"
+    std::cout << "[INFO] Playlist loaded: " << playlist_name
+              << " (" << playlist.get_track_count() << " tracks)" << std::endl;
 }
+
 /**
  * TODO: Implement getTrackTitles method
  * @return Vector of track titles in the playlist
  */
 std::vector<std::string> DJLibraryService::getTrackTitles() const {
     std::vector<std::string> titles;
-     for (const auto& track : playlist.getTracks()) { 
+    for (const auto& track : playlist.getTracks()) { 
         titles.push_back(track->get_title());
     }
     return titles;

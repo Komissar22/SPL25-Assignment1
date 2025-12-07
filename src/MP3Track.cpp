@@ -3,48 +3,76 @@
 #include <cmath>
 #include <algorithm>
 
+// Constructor (no debug prints allowed)
 MP3Track::MP3Track(const std::string& title, const std::vector<std::string>& artists, 
                    int duration, int bpm, int bitrate, bool has_tags)
-    : AudioTrack(title, artists, duration, bpm), bitrate(bitrate), has_id3_tags(has_tags) {
-
-    std::cout << "MP3Track created: " << bitrate << " kbps" << std::endl;
+    : AudioTrack(title, artists, duration, bpm), bitrate(bitrate), has_id3_tags(has_tags)
+{
+    // No creation print here — the manager prints it
 }
 
-// ========== TODO: STUDENTS IMPLEMENT THESE VIRTUAL FUNCTIONS ==========
-
-void MP3Track::load() {
+//
+// ===========================
+//        load()
+// ===========================
+// Format must match exactly the required output
+//
+void MP3Track::load() 
+{
     std::cout << "[MP3Track::load] Loading MP3: \"" << title
               << "\" at " << bitrate << " kbps...\n";
-    // TODO: Implement MP3 loading with format-specific operations
-    // NOTE: Use exactly 2 spaces before the arrow (→) character
-    if(has_id3_tags){ std::cout << "  → Processing ID3 metadata (artist info, album art, etc.)...";}
-    else{std::cout << "  → No ID3 tags found.";}
-    std::cout << "  → Decoding MP3 frames...";
-    std::cout << "  → Load complete.";
+
+    if(has_id3_tags) {
+        std::cout << "  → Processing ID3 metadata (artist info, album art, etc.)...\n";
+    } else {
+        std::cout << "  → No ID3 tags found.\n";
+    }
+
+    std::cout << "  → Decoding MP3 frames...\n";
+    std::cout << "  → Load complete.\n";
 }
 
-void MP3Track::analyze_beatgrid() {
-     std::cout << "[MP3Track::analyze_beatgrid] Analyzing beat grid for: \"" << title << "\"\n";
-    // TODO: Implement MP3-specific beat detection analysis
-    // NOTE: Use exactly 2 spaces before each arrow (→) character
-    int estimated_beats= (duration_seconds/60.0)*bpm;
-    double precision_factor= bitrate / 320.0;
-    std::cout << "  → Estimated beats: " << estimated_beats 
-    << "  → Compression precision factor:" << precision_factor << "";
+//
+// ===========================
+//   analyze_beatgrid()
+// ===========================
+// Must print both arrows on the same line
+//
+void MP3Track::analyze_beatgrid()
+{
+    std::cout << "[MP3Track::analyze_beatgrid] Analyzing beat grid for: \"" 
+              << title << "\"\n";
+
+    int estimated_beats = (duration_seconds / 60.0) * bpm;
+    double precision_factor = bitrate / 320.0;
+
+    std::cout << "  → Estimated beats: " << estimated_beats
+              << "  → Compression precision factor: " << precision_factor << "\n";
 }
 
-double MP3Track::get_quality_score() const {
-    // TODO: Implement comprehensive quality scoring
-    // NOTE: This method does NOT print anything
-    double base_score= (bitrate / 320.0) * 100.0;
-    if(has_id3_tags) {base_score = base_score + 5;}
-    if(bitrate < 128) {base_score = base_score - 10;}
+//
+// ===========================
+//     get_quality_score()
+// ===========================
+// No printing — only returns a computed score
+//
+double MP3Track::get_quality_score() const 
+{
+    double base_score = (bitrate / 320.0) * 100.0;
+
+    if(has_id3_tags) base_score += 5;
+    if(bitrate < 128) base_score -= 10;
 
     return base_score;
 }
 
-PointerWrapper<AudioTrack> MP3Track::clone() const {
-    // TODO: Implement polymorphic cloning
-
+//
+// ===========================
+//           clone()
+// ===========================
+// Returns a deep copy (polymorphic clone)
+//
+PointerWrapper<AudioTrack> MP3Track::clone() const 
+{
     return PointerWrapper<AudioTrack>(new MP3Track(*this));
 }
