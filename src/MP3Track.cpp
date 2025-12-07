@@ -40,6 +40,20 @@ double MP3Track::get_quality_score() const {
     if(has_id3_tags) {base_score = base_score + 5;}
     if(bitrate < 128) {base_score = base_score - 10;}
 
+    if (base_score > 100.0)
+        base_score = 100.0;
+    if (base_score < 0.0)
+        base_score = 0.0;
+
+
+    #ifdef DEBUG
+    std::cout << "[MP3Track::get_quality_score] \"" 
+              << title 
+              << "\" score = " 
+              << static_cast<int>(base_score) 
+              << "/100" 
+              << std::endl;
+    #endif
     return base_score;
 }
 
