@@ -82,7 +82,7 @@ int DJSession::load_track_to_controller(const std::string& track_name) {
     int cache_result= controller_service.loadTrackToCache(*track);
     if(cache_result==1){stats.cache_hits++;}
     if(cache_result==0){stats.cache_misses++;}
-    if(cache_result==-1){stats.cache_misses++; stats.cache_evictions;}
+    if(cache_result==-1){stats.cache_misses++; stats.cache_evictions++;}
 
     return cache_result; 
 }
@@ -189,6 +189,12 @@ void DJSession::simulate_dj_performance() {
                 checkout=false;
             }
             else{
+                if (!load_playlist(selected)) {
+                std::cerr << "[ERROR] Failed to load playlist '" 
+                          << selected << "'" << std::endl;
+                continue;
+            }
+            
             for(std::string& track : track_titles){
             std::cout << "\n-- Processing: " << track << std::endl;
             stats.tracks_processed++;
@@ -196,15 +202,18 @@ void DJSession::simulate_dj_performance() {
             load_track_to_mixer_deck(track);
             }
         }
-        print_session_summary();
-        stats.tracks_processed = 0;
-        stats.cache_hits = 0;
-        stats.cache_misses = 0;
-        stats.cache_evictions = 0;
-        stats.deck_loads_a = 0;
-        stats.deck_loads_b = 0;
-        stats.transitions = 0;
-        stats.errors = 0;
+
+        if (checkout){
+            print_session_summary();
+            stats.tracks_processed = 0;
+            stats.cache_hits = 0;
+            stats.cache_misses = 0;
+            stats.cache_evictions = 0;
+            stats.deck_loads_a = 0;
+            stats.deck_loads_b = 0;
+            stats.transitions = 0;
+            stats.errors = 0;
+        }
         std::cout << "\n[INFO] Finished playlist number: " << selected << std::endl;
     }
 }

@@ -55,7 +55,7 @@ void DJLibraryService::buildLibrary(const std::vector<SessionConfig::TrackInfo>&
               << " tracks loaded\n";
 }
 
-    
+
 
 /**
  * @brief Display the current state of the DJ library playlist
