@@ -14,6 +14,7 @@ int DJControllerService::loadTrackToCache(AudioTrack& track) {
 
     if (cache.contains(title)) {
         cache.get(title);
+        displayCacheStatus();
         return 1;
     }
 
@@ -28,7 +29,9 @@ int DJControllerService::loadTrackToCache(AudioTrack& track) {
     cloned->load();
     cloned->analyze_beatgrid();
 
-    if (cache.put(std::move(clone_wrapper))) {
+    bool evicted = cache.put(std::move(clone_wrapper));
+    displayCacheStatus();
+    if (evicted) {
         return -1;
     }
 
