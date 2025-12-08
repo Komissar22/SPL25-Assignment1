@@ -41,34 +41,44 @@ int MixingEngineService::loadTrackToDeck(const AudioTrack& track) {
     }
     size_t prev_active = active_deck;
     size_t target;
-    if (decks[0] == nullptr && decks[1] == nullptr){target = 0;}
+    
+    if (decks[0] == nullptr && decks[1] == nullptr){
+        target = 0;
+        std::cout << "[Deck Switch] Target deck: " << target << std::endl;
+    }
     else{
         target = 1 - active_deck;
         std::cout << "[Deck Switch] Target deck: " << target << std::endl;
-        if (decks[target] != nullptr) {
-            delete decks[target];
-            decks[target] = nullptr;
+    }
+
+    cloned->load();
+    cloned->analyze_beatgrid();
+
+    if (auto_sync) {
+        bool both_decks_present = (decks[0] != nullptr && decks[1] != nullptr);
+        bool no_decks_present   = (decks[0] == nullptr && decks[1] == nullptr);
+
+        if (both_decks_present && can_mix_tracks(cloned)) {
+            sync_bpm(cloned);
+        } else if (no_decks_present) {
+            std::cout << "[Sync BPM] Cannot sync - one of the decks is empty." << std::endl;
         }
     }
 
-    if (decks[active_deck] && auto_sync && can_mix_tracks(cloned)){
-        sync_bpm(cloned);
+    if (decks[target] != nullptr) {
+            delete decks[target];
+            decks[target] = nullptr;
     }
 
     decks[target]=cloned.release();
-    std::cout << "[Load Complete] " << track.get_title() << 
-                " is now loaded on deck " << target << std::endl;
-     if (prev_active != target && decks[prev_active]) {
-        std::cout << "[Unload] Unloading previous deck " << prev_active
-                  << track.get_title() << std::endl;
-        delete decks[prev_active];
-        decks[prev_active] = nullptr;
-    }
-   std::cout << "[Unload] Unloading previous deck " << active_deck << track.get_title() << std::endl;
+
+    std::cout << "[Load Complete] '" << track.get_title()
+              << "' is now loaded on deck " << target << std::endl;
     
    active_deck=target;
     std::cout << "[Active Deck] Switched to deck " << target << std::endl;
-    return target;
+    displayDeckStatus();
+    return static_cast<int> (target);
 }
 
 /**

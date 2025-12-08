@@ -52,6 +52,9 @@ private:
         size_t errors = 0;
     } stats;
 
+    std::vector<AudioTrack*> get_reversed_tracks(const Playlist& playlist);
+    void process_playlist(const Playlist& playlist);
+
 public:
     // ========== CONSTRUCTORS & DESTRUCTOR ==========
 
@@ -94,6 +97,8 @@ public:
      * Contract: Orchestrate the DJ performance simulation
      */
     void simulate_dj_performance();
+
+
 
 
     // ========== STATUS & DISPLAY METHODS ==========

@@ -66,6 +66,13 @@ double WAVTrack::get_quality_score() const {
     if (score > 100.0) {
         score = 100.0;
     }
+    #ifdef DEBUG
+    std::cout << "[WAVTrack::get_quality_score] \""
+              << title
+              << "\" score = "
+              << static_cast<int>(score)
+              << "/100" << std::endl;
+    #endif
 
     return score;
 }

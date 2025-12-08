@@ -27,8 +27,6 @@ void DJLibraryService::buildLibrary(const std::vector<SessionConfig::TrackInfo>&
                 info.extra_param1, // bitrate
                 has_tags
             );
-            std::cout << "MP3: MP3Track created: "
-                      << info.extra_param1 << " kbps\n";
         }
         else if (info.type == "WAV") {
             track = new WAVTrack(
@@ -39,9 +37,6 @@ void DJLibraryService::buildLibrary(const std::vector<SessionConfig::TrackInfo>&
                 info.extra_param1, // sample_rate
                 info.extra_param2  // bit_depth
             );
-            std::cout << "WAV: WAVTrack created: "
-                      << info.extra_param1 << "Hz/"
-                      << info.extra_param2 << "bit\n";
         }
         else {
             continue;
@@ -52,10 +47,11 @@ void DJLibraryService::buildLibrary(const std::vector<SessionConfig::TrackInfo>&
 
     std::cout << "[INFO] Track library built: " 
               << library_tracks.size() 
-              << " tracks loaded\n";
+              << " tracks loaded " << std::endl;
+
 }
 
-
+    
 
 /**
  * @brief Display the current state of the DJ library playlist
@@ -98,7 +94,7 @@ AudioTrack* DJLibraryService::findTrack(const std::string& track_title) {
 void DJLibraryService::loadPlaylistFromIndices(const std::string& playlist_name, 
                                                const std::vector<int>& track_indices) {
     std::cout <<"[INFO] Loading playlist: " << playlist_name << std::endl;
-    Playlist lst(playlist_name);
+    playlist = Playlist (playlist_name);
 
     for(int index : track_indices){
         if(index<=0 || index > library.size()){
@@ -116,11 +112,10 @@ void DJLibraryService::loadPlaylistFromIndices(const std::string& playlist_name,
         cloned->load();
         cloned->analyze_beatgrid();
         playlist.add_track(cloned.release());
-        std::cout << " Added " << (*track).get_title() << "to playlist" << playlist_name << std::endl;
     }
     
-    std::cout << " [INFO] Playlist loaded: " << playlist_name <<
-                     playlist.get_track_count()  << " tracks." << std::endl;
+    std::cout << "[INFO] Playlist loaded: " << playlist_name
+          << " (" << playlist.get_track_count() << " tracks)" << std::endl;
 }
 /**
  * TODO: Implement getTrackTitles method

@@ -78,7 +78,8 @@ int DJSession::load_track_to_controller(const std::string& track_name) {
         stats.errors++;
         return 0;
     }
-    std::cout <<"[System] Loading track " << track_name << "to controller..." << std::endl;
+    std::cout << "[System] Loading track '" << track_name
+          << "' to controller..." << std::endl;
     int cache_result= controller_service.loadTrackToCache(*track);
     if(cache_result==1){stats.cache_hits++;}
     if(cache_result==0){stats.cache_misses++;}
@@ -102,7 +103,8 @@ AudioTrack* track = controller_service.getTrackFromCache(track_title);
         return false;
     }
 
-    std::cout << "[System] Loading track '" << track_title << "' to mixer deck...\n";
+    std::cout << "[System] Delegating track transfer to MixingEngineService for: "
+          << track_title << std::endl;
     int deck_index = mixing_service.loadTrackToDeck(*track);
     if (deck_index == 0) {
         stats.deck_loads_a++;
@@ -164,21 +166,18 @@ void DJSession::simulate_dj_performance() {
             std::cerr << "[ERROR] Failed to load playlist " << std::endl;
             continue;
         }
-        for(std::string& track : track_titles){
-            std::cout << "\n-- Processing: " << track << std::endl;
+
+        const Playlist& pl = library_service.getPlaylist();
+        auto tracks = get_reversed_tracks(pl); 
+
+        for(AudioTrack* track : tracks){
+            const std::string& title = track->get_title();
+            std::cout << "--- Processing: " << title << " ---" << std::endl;
             stats.tracks_processed++;
-            load_track_to_controller(track);
-            load_track_to_mixer_deck(track);
+            load_track_to_controller(title);
+            load_track_to_mixer_deck(title);
         }
         print_session_summary();
-        stats.tracks_processed = 0;
-        stats.cache_hits = 0;
-        stats.cache_misses = 0;
-        stats.cache_evictions = 0;
-        stats.deck_loads_a = 0;
-        stats.deck_loads_b = 0;
-        stats.transitions = 0;
-        stats.errors = 0;
     }
 }
     else {
@@ -194,25 +193,20 @@ void DJSession::simulate_dj_performance() {
                           << selected << "'" << std::endl;
                 continue;
             }
-            
-            for(std::string& track : track_titles){
-            std::cout << "\n-- Processing: " << track << std::endl;
+            const Playlist& pl = library_service.getPlaylist();
+            auto tracks = get_reversed_tracks(pl);
+
+            for(AudioTrack* track : tracks){
+            const std::string& title = track->get_title();
+            std::cout << "--- Processing: " << title << " ---" << std::endl;
             stats.tracks_processed++;
-            load_track_to_controller(track);
-            load_track_to_mixer_deck(track);
+            load_track_to_controller(title);
+            load_track_to_mixer_deck(title);
             }
         }
 
         if (checkout){
             print_session_summary();
-            stats.tracks_processed = 0;
-            stats.cache_hits = 0;
-            stats.cache_misses = 0;
-            stats.cache_evictions = 0;
-            stats.deck_loads_a = 0;
-            stats.deck_loads_b = 0;
-            stats.transitions = 0;
-            stats.errors = 0;
         }
         std::cout << "\n[INFO] Finished playlist number: " << selected << std::endl;
     }
@@ -309,4 +303,10 @@ void DJSession::print_session_summary() const {
     std::cout << "Transitions: " << stats.transitions << std::endl;
     std::cout << "Errors: " << stats.errors << std::endl;
     std::cout << "=== Session Complete ===" << std::endl;
+}
+
+std::vector<AudioTrack*> DJSession::get_reversed_tracks(const Playlist& playlist) {
+    std::vector<AudioTrack*> tracks = playlist.getTracks();
+    std::reverse(tracks.begin(), tracks.end());
+    return tracks;
 }
